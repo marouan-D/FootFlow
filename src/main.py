@@ -52,7 +52,52 @@ def run_pipeline():
 
         # Stap 4 — CSV bestanden verwerken
         logger.info("Stap 4: CSV bestanden verwerken...")
-        csv_handler = CSVHandler(data_map="data")
+        csv_handler = CSVHandler(data_map="../data")
+
+        # Spelers CSV inlezen en valideren
+        df_spelers = csv_handler.lees_csv("spelers.csv")
+
+        if df_spelers is not None:
+            # Valideer verplichte kolommen
+            verplicht = ["naam", "positie", "leeftijd", "team_naam"]
+            if csv_handler.valideer_data(df_spelers, verplicht):
+
+                # Schoon data op
+                df_spelers = df_spelers.dropna()
+
+                # Spelers opslaan in database via teamnaam
+                opgeslagen = 0
+                fouten = 0
+
+                for _, rij in df_spelers.iterrows():
+                    try:
+                        # Zoek team_id op via teamnaam
+                        resultaat = db.fetch_all(
+                            "SELECT team_id FROM teams WHERE naam = %s",
+                            (rij["team_naam"],)
+                        )
+                        if resultaat:
+                            team_id = resultaat[0]["team_id"]
+                            Speler.opslaan(
+                                db,
+                                naam=rij["naam"],
+                                positie=rij["positie"],
+                                leeftijd=int(rij["leeftijd"]),
+                                team_id=team_id
+                            )
+                            opgeslagen += 1
+                        else:
+                            logger.warning(f"Team niet gevonden voor speler: {rij['naam']}")
+                            fouten += 1
+                    except Exception as e:
+                        logger.error(f"Fout bij opslaan speler {rij['naam']}: {e}")
+                        fouten += 1
+
+                logger.info(f"Spelers verwerkt: {opgeslagen} opgeslagen, {fouten} fouten.")
+            else:
+                logger.error("CSV validatie mislukt — verplichte kolommen ontbreken.")
+        else:
+            logger.warning("Geen spelers CSV bestand gevonden.")
 
         logger.info("=== FootFlow Pipeline succesvol afgerond ===")
 
@@ -79,7 +124,7 @@ def main():
         run_pipeline()
     elif keuze == "2":
         scheduler = PipelineScheduler(run_pipeline)
-        scheduler.start()
+        scheduler.start(test_modus=True)
     else:
         print("Ongeldige keuze. Probeer opnieuw.")
 

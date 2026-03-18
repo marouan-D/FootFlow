@@ -19,22 +19,41 @@ class PipelineScheduler:
         self.scheduler = BlockingScheduler()
         self.pipeline_functie = pipeline_functie
 
-    def start(self):
+    def start(self, test_modus=False):
         """
-        Start de scheduler — pipeline draait elke dag om 08:00.
+        Start de scheduler.
+        - test_modus=True: pipeline draait elke 2 minuten (voor demonstratie)
+        - test_modus=False: pipeline draait elke dag om 08:00 (productie)
         """
         try:
-            # Voeg de taak toe aan de scheduler
-            self.scheduler.add_job(
-                self.pipeline_functie,
-                trigger="cron",
-                hour=8,
-                minute=0,
-                id="footflow_pipeline"
-            )
+            if test_modus:
+                # Test modus — elke 2 minuten
+                self.scheduler.add_job(
+                    self.pipeline_functie,
+                    trigger="interval",
+                    minutes=2,
+                    id="footflow_pipeline_test"
+                )
+                logger.info("Scheduler gestart in TEST MODUS — pipeline draait elke 2 minuten.")
+                print("⏰ Scheduler actief — pipeline draait elke 2 minuten. Druk Ctrl+C om te stoppen.")
+            else:
+                # Productie modus — elke dag om 08:00
+                self.scheduler.add_job(
+                    self.pipeline_functie,
+                    trigger="cron",
+                    hour=8,
+                    minute=0,
+                    id="footflow_pipeline"
+                )
+                logger.info("Scheduler gestart — pipeline draait elke dag om 08:00.")
+                print("⏰ Scheduler actief — pipeline draait elke dag om 08:00. Druk Ctrl+C om te stoppen.")
 
-            logger.info("Scheduler gestart — pipeline draait elke dag om 08:00.")
-            self.scheduler.start()
+            try:
+                self.scheduler.start()
+            except KeyboardInterrupt:
+                logger.info("Scheduler gestopt door gebruiker.")
+                self.scheduler.shutdown()
+                print("\n⛔ Scheduler gestopt. Tot ziens!")
 
         except Exception as e:
             logger.error(f"Fout bij starten scheduler: {e}")
