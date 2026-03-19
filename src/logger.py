@@ -10,8 +10,12 @@ def get_logger(name):
     Maak een logger aan met de opgegeven naam.
     Logs worden weggeschreven naar logs/pipeline.log en de terminal.
     """
+    # Absoluut pad naar de logs map (altijd vanuit de FootFlow hoofdmap)
+    basis_map = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    logs_map = os.path.join(basis_map, "logs")
+
     # Zorg dat de logs map bestaat
-    os.makedirs("logs", exist_ok=True)
+    os.makedirs(logs_map, exist_ok=True)
 
     # Maak de logger aan
     logger = logging.getLogger(name)
@@ -23,7 +27,8 @@ def get_logger(name):
     )
 
     # Log naar bestand
-    file_handler = logging.FileHandler("logs/pipeline.log")
+    log_bestand = os.path.join(logs_map, "pipeline.log")
+    file_handler = logging.FileHandler(log_bestand)
     file_handler.setFormatter(formatter)
 
     # Log naar terminal
