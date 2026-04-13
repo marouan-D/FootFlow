@@ -165,7 +165,7 @@ class Dashboard:
             st.dataframe(df_stand[["Team", "Gespeeld", "Gewonnen", "Gelijk", "Verloren", "Punten"]], width="stretch")
 
             # Grafiek — Thuis vs Uit winst per team (top 10)
-            st.subheader("🏠 Thuis vs Uit Gewonnen — Top 10 Teams")
+            st.subheader("Thuis vs Uit Gewonnen — Top 10 Teams")
             top10 = df_stand.head(10).copy()
             top10 = top10.sort_values("Thuis Gewonnen", ascending=True)
 
@@ -192,7 +192,7 @@ class Dashboard:
         st.markdown("---")
 
         # Sectie 2 — Wedstrijden met filter
-        st.header("📋 Wedstrijden")
+        st.header("Wedstrijden")
         df_alle_wedstrijden = self.haal_alle_wedstrijden_op()
         teams = self.haal_teams_op()
 
@@ -222,7 +222,7 @@ class Dashboard:
         st.markdown("---")
 
         # Sectie 3 — Spelers overzicht
-        st.header("👟 Spelers Overzicht")
+        st.header("Spelers Overzicht")
         df_spelers = self.haal_spelers_op()
 
         if not df_spelers.empty:
