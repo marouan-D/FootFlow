@@ -26,7 +26,7 @@ pip install -r requirements.txt
 ### 3. .env bestand aanmaken
 Maak een `.env` bestand aan in de `footflow` map:
 ```
-API_KEY= api_key
+API_KEY= hier_api_key
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=
