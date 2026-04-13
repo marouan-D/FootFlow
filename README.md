@@ -49,6 +49,7 @@ Kies optie 1 om de pipeline direct te starten.
 ```
 cd src
 streamlit run dashboard.py
+CTRL+C om streamlit te stoppen
 ```
 
 ### Testen uitvoeren
