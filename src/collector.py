@@ -1,7 +1,3 @@
-# collector.py
-# Dit bestand verzamelt data via de API en slaat het op in de database.
-# Dit is de kern van de data pipeline.
-
 from api import FootballAPI
 from models import Competitie, Team, Wedstrijd, Speler
 from logger import get_logger
@@ -9,19 +5,12 @@ from logger import get_logger
 logger = get_logger(__name__)
 
 class DataCollector:
-    """
-    Klasse voor het verzamelen en opslaan van voetbaldata.
-    """
 
     def __init__(self, db):
-        """Initialiseer de collector met een database verbinding."""
         self.db = db
         self.api = FootballAPI()
 
     def haal_team_id_op(self, teamnaam):
-        """
-        Zoek het database team_id op via de teamnaam.
-        """
         try:
             resultaat = self.db.fetch_all(
                 "SELECT team_id FROM teams WHERE naam = %s", (teamnaam,)
@@ -35,9 +24,6 @@ class DataCollector:
             return None
 
     def verzamel_teams(self, competitie_code="PL", seizoen="2024"):
-        """
-        Haal teams op via de API en sla ze op in de database.
-        """
         logger.info(f"Teams ophalen voor {competitie_code}...")
         data = self.api.get_teams(competitie_code, seizoen)
 
@@ -59,10 +45,6 @@ class DataCollector:
         logger.info("Alle teams opgeslagen in de database.")
 
     def verzamel_wedstrijden(self, competitie_code="PL", seizoen="2024"):
-        """
-        Haal wedstrijden op via de API en sla ze op in de database.
-        Teams worden opgezocht via naam in plaats van API ID.
-        """
         logger.info(f"Wedstrijden ophalen voor {competitie_code} seizoen {seizoen}...")
         data = self.api.get_wedstrijden(competitie_code, seizoen)
 
@@ -77,21 +59,21 @@ class DataCollector:
         overgeslagen = 0
 
         for wedstrijd in wedstrijden:
-            # Haal teamnamen op uit de API
+            # teamnamen ophalen uit de API
             thuis_naam = wedstrijd.get("homeTeam", {}).get("name")
             uit_naam = wedstrijd.get("awayTeam", {}).get("name")
 
-            # Zoek de database ID's op via teamnaam
+            # team_id opzoeken via teamnaam
             thuis_team_id = self.haal_team_id_op(thuis_naam)
             uit_team_id = self.haal_team_id_op(uit_naam)
 
-            # Sla over als team niet gevonden
+            # wedstrijd overslaan als team niet gevonden
             if not thuis_team_id or not uit_team_id:
                 logger.warning(f"Team niet gevonden, wedstrijd overgeslagen: {thuis_naam} vs {uit_naam}")
                 overgeslagen += 1
                 continue
 
-            # Haal de uitslag op
+            # uitslag ophalen
             score = wedstrijd.get("score", {})
             fulltime = score.get("fullTime", {})
             thuis = fulltime.get("home")
@@ -111,12 +93,7 @@ class DataCollector:
         logger.info(f"{opgeslagen} wedstrijden opgeslagen, {overgeslagen} overgeslagen.")
 
     def verzamel_alles(self, competitie_code="PL", seizoen="2024"):
-        """
-        Verzamel alle data — competitie, teams en wedstrijden.
-        """
         logger.info("Start verzamelen van alle data...")
-
-        # Eerst competitie opslaan zodat teams een competitie_id hebben
         logger.info("Competitie opslaan...")
         Competitie.opslaan(self.db, naam="Premier League", land="England")
 

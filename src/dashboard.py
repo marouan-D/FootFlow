@@ -1,14 +1,9 @@
-# dashboard.py
-# Dit bestand maakt een interactief dashboard met Streamlit.
-# Het dashboard toont competitiestand, wedstrijduitslagen en spelers.
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 import os
 
-# Zorg dat de src map gevonden wordt
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from database import Database
@@ -17,16 +12,11 @@ from logger import get_logger
 logger = get_logger(__name__)
 
 class Dashboard:
-    """
-    Klasse voor het weergeven van voetbaldata in een dashboard.
-    """
 
     def __init__(self, db):
-        """Initialiseer het dashboard met een database verbinding."""
         self.db = db
 
     def haal_alle_wedstrijden_op(self):
-        """Haal alle gespeelde wedstrijden op uit de database."""
         try:
             query = (
                 "SELECT t1.naam AS thuis_team, t2.naam AS uit_team, "
@@ -45,7 +35,6 @@ class Dashboard:
             return pd.DataFrame()
 
     def haal_teams_op(self):
-        """Haal alle teamnamen op."""
         try:
             query = "SELECT naam FROM teams ORDER BY naam"
             resultaat = self.db.fetch_all(query)
@@ -55,7 +44,6 @@ class Dashboard:
             return []
 
     def haal_competitiestand_op(self):
-        """Bereken de competitiestand op basis van wedstrijduitslagen."""
         try:
             query = (
                 "SELECT t1.naam AS thuis_team, t2.naam AS uit_team, w.uitslag "
@@ -123,7 +111,6 @@ class Dashboard:
             return pd.DataFrame()
 
     def haal_spelers_op(self):
-        """Haal alle spelers op uit de database."""
         try:
             query = (
                 "SELECT s.naam, s.positie, s.leeftijd, t.naam AS team "
@@ -139,16 +126,12 @@ class Dashboard:
             return pd.DataFrame()
 
     def toon_dashboard(self):
-        """
-        Toon het Streamlit dashboard met alle visualisaties.
-        """
         st.set_page_config(page_title="FootFlow Dashboard", page_icon="⚽", layout="wide")
 
         st.title("⚽ FootFlow — Premier League Dashboard 2024")
         st.markdown("*Data pipeline gebouwd met Python, MySQL en Streamlit*")
         st.markdown("---")
 
-        # Sectie 1 — Competitiestand
         st.header("🏆 Competitiestand")
         df_stand = self.haal_competitiestand_op()
 
@@ -164,7 +147,6 @@ class Dashboard:
             st.markdown("")
             st.dataframe(df_stand[["Team", "Gespeeld", "Gewonnen", "Gelijk", "Verloren", "Punten"]], width="stretch")
 
-            # Grafiek — Thuis vs Uit winst per team (top 10)
             st.subheader("Thuis vs Uit Gewonnen — Top 10 Teams")
             top10 = df_stand.head(10).copy()
             top10 = top10.sort_values("Thuis Gewonnen", ascending=True)
@@ -191,13 +173,11 @@ class Dashboard:
 
         st.markdown("---")
 
-        # Sectie 2 — Wedstrijden met filter
         st.header("Wedstrijden")
         df_alle_wedstrijden = self.haal_alle_wedstrijden_op()
         teams = self.haal_teams_op()
 
         if not df_alle_wedstrijden.empty:
-            # Filter op team
             col1, col2 = st.columns([1, 3])
             with col1:
                 gekozen_team = st.selectbox(
@@ -221,7 +201,6 @@ class Dashboard:
 
         st.markdown("---")
 
-        # Sectie 3 — Spelers overzicht
         st.header("Spelers Overzicht")
         df_spelers = self.haal_spelers_op()
 
@@ -247,7 +226,6 @@ class Dashboard:
         st.caption("FootFlow Data Pipeline — MBO niveau 4 Eindproject | Marouan")
 
 
-# Start het dashboard direct als dit bestand wordt uitgevoerd
 db = Database()
 db.connect()
 dashboard = Dashboard(db)
