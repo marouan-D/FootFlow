@@ -15,17 +15,6 @@ class FootballAPI:
         self.api_key = os.getenv("API_KEY")
         self.headers = {"X-Auth-Token": self.api_key}
 
-    def get_competities(self):
-        try:
-            url = f"{self.BASE_URL}/competitions"
-            response = requests.get(url, headers=self.headers)
-            response.raise_for_status()
-            logger.info("Competities succesvol opgehaald.")
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Fout bij ophalen competities: {e}")
-            return None
-
     def get_wedstrijden(self, competitie_code="PL", seizoen="2024"):
         try:
             url = f"{self.BASE_URL}/competitions/{competitie_code}/matches"
@@ -48,15 +37,4 @@ class FootballAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             logger.error(f"Fout bij ophalen teams: {e}")
-            return None
-
-    def get_standen(self, competitie_code="PL"):
-        try:
-            url = f"{self.BASE_URL}/competitions/{competitie_code}/standings"
-            response = requests.get(url, headers=self.headers)
-            response.raise_for_status()
-            logger.info(f"Standen opgehaald voor {competitie_code}.")
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Fout bij ophalen standen: {e}")
             return None

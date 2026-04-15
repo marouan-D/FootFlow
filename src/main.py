@@ -1,7 +1,6 @@
 from database import Database
 from models import Competitie, Team, Wedstrijd, Speler
 from collector import DataCollector
-from transformer import DataTransformer
 from csv_handler import CSVHandler
 from scheduler import PipelineScheduler
 from logger import get_logger
@@ -30,12 +29,8 @@ def run_pipeline():
         collector = DataCollector(db)
         collector.verzamel_alles(competitie_code="PL", seizoen="2024")
 
-        logger.info("Stap 3: Data transformeren...")
-        transformer = DataTransformer()
-
-        logger.info("Stap 4: CSV bestanden verwerken...")
+        logger.info("Stap 3: CSV bestanden verwerken...")
         csv_handler = CSVHandler(data_map="../data")
-
         df_spelers = csv_handler.lees_csv("spelers.csv")
 
         if df_spelers is not None:
@@ -87,10 +82,10 @@ def run_pipeline():
 
 def main():
     print("⚽ Welkom bij FootFlow Data Pipeline!")
-    print("1. Pipeline nu starten")
+    print("1. Pipeline nu uitvoeren")
     print("2. Pipeline automatisch starten (elke dag 08:00)")
 
-    keuze = input("kies een optie (1 of 2): ")
+    keuze = input("Maak een keuze (1 of 2): ")
 
     if keuze == "1":
         run_pipeline()
